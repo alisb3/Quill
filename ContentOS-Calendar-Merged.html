@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ContentOS — Content Calendar</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet">
+<style>
+:root {
+  --bg:#0d0d10; --bg2:#141417; --bg3:#1c1c21; --bg4:#242429;
+  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
+  --text:#f0f0f4; --text2:#9090a8; --text3:#55556a;
+  --accent:#6ee7b7; --accent-bg:rgba(110,231,183,0.08); --accent-border:rgba(110,231,183,0.22);
+  --c0:#6ee7b7; --c1:#a78bfa; --c2:#fbbf24; --c3:#60a5fa; --c4:#f472b6;
+  --r:10px; --r-lg:16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:2rem 1rem 5rem}
+.wrap{max-width:1200px;margin:0 auto}
+
+/* HEADER */
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;letter-spacing:-.02em}
+.logo span{color:var(--accent)}
+.badge{font-size:11px;font-weight:500;letter-spacing:.06em;background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-border);padding:4px 12px;border-radius:20px}
+
+/* SETUP CARD */
+.setup-card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r-lg);padding:24px;margin-bottom:1.5rem}
+.setup-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px}
+.setup-sub{font-size:13px;color:var(--text2);margin-bottom:1.5rem;line-height:1.5}
+.setup-step{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;margin-bottom:1.5rem}
+.setup-step-label{font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--accent);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.setup-step-label::before{content:attr(data-step);width:24px;height:24px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--accent);flex-shrink:0}
+
+/* SELECTS ROW */
+.sel-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem}
+.field label{display:block;font-size:11px;font-weight:500;letter-spacing:.05em;color:var(--text3);margin-bottom:6px}
+select{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;padding:10px 12px;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2355556a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;cursor:pointer;transition:border-color .15s}
+select:focus{border-color:var(--accent-border)}
+
+/* CHIPS */
+.chips-label{font-size:11px;font-weight:500;letter-spacing:.05em;color:var(--text3);margin-bottom:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.25rem}
+.chip{padding:6px 14px;border-radius:20px;font-size:12px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;user-select:none}
+.chip.on{border-color:var(--accent-border);background:var(--accent-bg);color:var(--accent);font-weight:500}
+.chip:hover:not(.on){color:var(--text)}
+
+/* PILLAR CARDS */
+.pillar-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:1.5rem}
+.pcard{border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;cursor:pointer;transition:all .15s;background:var(--bg3)}
+.pcard:hover{border-color:var(--border2)}
+.pcard.on{border-color:var(--accent-border);background:var(--accent-bg)}
+.pcard.on .pc-name{color:var(--accent)}
+.pc-icon{font-size:18px;color:var(--text3);margin-bottom:8px;display:block}
+.pcard.on .pc-icon{color:var(--accent)}
+.pc-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px}
+.pc-sub{font-size:11px;color:var(--text3);line-height:1.4}
+
+.sel-info{font-size:12px;color:var(--text3);margin-bottom:10px}
+.sel-info span{color:var(--accent);font-weight:500}
+
+/* BUILD BTN */
+.build-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;background:var(--accent);color:#06150e;border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;letter-spacing:.01em;transition:opacity .15s,transform .1s}
+.build-btn:hover{opacity:.9;transform:translateY(-1px)}
+
+/* RESULT HEADER */
+.result-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:1.25rem}
+.meta-tag{font-size:11px;font-weight:600;letter-spacing:.05em;padding:4px 12px;border-radius:20px;border:1px solid var(--border2);color:var(--text2);background:var(--bg2)}
+.meta-tag.hl{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}
+.back-btn{display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--border2);color:var(--text2);font-family:'Inter',sans-serif;font-size:12px;padding:7px 14px;border-radius:var(--r);cursor:pointer;margin-left:auto;transition:all .15s}
+.back-btn:hover{color:var(--text)}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.5rem}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px;text-align:center}
+.stat-val{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--text)}
+.stat-lbl{font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:.04em}
+
+/* TABS */
+.tabs{display:flex;gap:5px;background:var(--bg2);border:1px solid var(--border);padding:4px;border-radius:var(--r-lg);margin-bottom:1.5rem}
+.tab{flex:1;padding:9px 4px;font-size:12px;font-weight:500;color:var(--text2);background:none;border:1px solid transparent;border-radius:var(--r);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s;font-family:'Inter',sans-serif}
+.tab i{font-size:14px}
+.tab.on{background:var(--bg4);color:var(--text);border-color:var(--border2)}
+.tab:hover:not(.on){color:var(--text)}
+.tsec{display:none}
+.tsec.on{display:block}
+
+/* LEGEND */
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1rem}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
+.leg-dot{width:8px;height:8px;border-radius:3px;flex-shrink:0}
+
+/* ══ TABLEAU MATRIX CALENDAR ══ */
+.tableau-header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:1.5rem}
+.tableau-left{flex:1}
+.tableau-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:0.5rem}
+.tableau-info{font-size:11px;color:var(--text3);margin-bottom:1rem}
+.save-btn{display:flex;align-items:center;gap:6px;background:var(--accent-bg);border:1px solid var(--accent-border);color:var(--accent);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;padding:7px 14px;border-radius:var(--r);cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.save-btn:hover{background:var(--accent);color:#06150e;border-color:var(--accent)}
+.save-btn i{font-size:13px}
+
+/* Tableau Matrix Grid - Scrollable Container */
+.tableau-wrapper{overflow-x:auto;border:1px solid var(--border);border-radius:var(--r-lg);background:var(--bg2)}
+.tableau-matrix{display:grid;gap:1px;background:var(--bg);padding:1px;min-width:100%}
+.tableau-cell{background:var(--bg2);border:1px solid var(--border);padding:8px;min-width:120px;min-height:60px;position:relative;cursor:pointer;transition:all .15s;font-size:10px;text-align:center}
+.tableau-cell:hover{background:var(--bg3);border-color:var(--border2)}
+.tableau-cell.has-task{background:var(--bg3);border-color:var(--border2)}
+.tableau-cell.has-task:hover{border-color:var(--accent-border)}
+.tableau-corner{background:var(--bg3);border:1px solid var(--border);padding:10px;font-size:9px;font-weight:700;color:var(--text3);text-align:center;min-width:70px;min-height:60px;display:flex;align-items:center;justify-content:center}
+.tableau-hour-label{background:var(--bg3);border:1px solid var(--border);padding:10px;font-size:9px;font-weight:600;color:var(--text2);text-align:center;min-width:70px;min-height:60px;display:flex;align-items:center;justify-content:center;white-space:nowrap}
+.tableau-day-header{background:var(--bg3);border:1px solid var(--border);padding:10px;font-size:11px;font-weight:700;color:var(--text);text-align:center;min-width:120px;min-height:60px;display:flex;align-items:center;justify-content:center}
+.tableau-task{display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;padding:4px;border-radius:4px;font-size:9px;font-weight:700;cursor:pointer;user-select:none;line-height:1.2;text-align:center;white-space:normal}
+
+/* PILLAR COLOR CLASSES */
+.p0{background:rgba(110,231,183,0.15);color:#6ee7b7}
+.p1{background:rgba(167,139,250,0.15);color:#a78bfa}
+.p2{background:rgba(251,191,36,0.15);color:#fbbf24}
+.p3{background:rgba(96,165,250,0.15);color:#60a5fa}
+.p4{background:rgba(244,114,182,0.15);color:#f472b6}
+
+/* PROMPTS */
+.tip-box{background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:var(--r);padding:11px 14px;margin-bottom:1.25rem;font-size:13px;color:var(--accent);display:flex;align-items:flex-start;gap:9px;line-height:1.5}
+.tip-box i{flex-shrink:0;margin-top:1px;font-size:15px}
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
+.fchip{font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif}
+.fchip.on{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}
+.prompt-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;margin-bottom:10px;transition:border-color .15s}
+.prompt-card:hover{border-color:var(--border2)}
+.pc-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.pc-badge{font-size:10px;font-weight:600;letter-spacing:.04em;padding:3px 10px;border-radius:20px}
+.pc-fmt{font-size:11px;color:var(--text3)}
+.copy-btn{margin-left:auto;font-size:11px;color:var(--text2);background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:5px 12px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Inter',sans-serif;transition:all .15s;flex-shrink:0}
+.copy-btn:hover{background:var(--bg4);color:var(--text)}
+.pc-text{font-size:12px;color:var(--text2);line-height:1.7;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:11px 13px;font-family:'Menlo','Courier New',monospace}
+
+/* ACTION CALENDAR */
+.week-block{margin-bottom:1.5rem}
+.week-header{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text2);letter-spacing:.05em;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.week-header::after{content:'';flex:1;height:1px;background:var(--border)}
+.day-row{display:flex;gap:10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;margin-bottom:6px;transition:border-color .15s;cursor:default}
+.day-row:hover{border-color:var(--border2)}
+.day-row.post-day{border-color:var(--border2);background:var(--bg3)}
+.day-row.post-day:hover{border-color:var(--accent-border)}
+.dr-date{min-width:44px;text-align:center;flex-shrink:0}
+.dr-day{font-size:10px;color:var(--text3);font-weight:500;letter-spacing:.05em}
+.dr-num{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--text3);line-height:1}
+.day-row.post-day .dr-num{color:var(--text)}
+.dr-content{flex:1}
+.dr-pillar{font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;display:inline-block;margin-bottom:6px}
+.dr-topic{font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px}
+.dr-steps{list-style:none;display:flex;flex-direction:column;gap:4px}
+.dr-steps li{font-size:12px;color:var(--text2);display:flex;align-items:flex-start;gap:7px;line-height:1.5}
+.step-num{width:16px;height:16px;border-radius:50%;background:var(--bg4);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--text3);flex-shrink:0;margin-top:1px}
+.day-row.post-day .step-num{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}
+.rest-label{font-size:12px;color:var(--text3);display:flex;align-items:center;gap:6px}
+.rest-label i{font-size:14px}
+
+@media(max-width:600px){
+  .sel-row{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .setup-title{font-size:19px}
+  .tab{font-size:10px;gap:3px;padding:8px 2px}
+  .tab i{font-size:12px}
+  .tableau-day-header{min-width:80px}
+  .tableau-cell{min-width:80px;min-height:50px}
+}
+
+/* ── IDEA MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r-lg);width:100%;max-width:480px;padding:24px;position:relative;transform:translateY(12px);transition:transform .2s;max-height:90vh;overflow-y:auto}
+.modal-overlay.open .modal-box{transform:translateY(0)}
+.modal-close{position:absolute;top:14px;right:14px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.modal-close:hover{color:var(--text);border-color:var(--border2)}
+.modal-date{font-size:11px;font-weight:600;letter-spacing:.07em;color:var(--text3);margin-bottom:10px}
+.modal-pillar{display:inline-block;font-size:11px;font-weight:600;padding:3px 12px;border-radius:20px;margin-bottom:12px}
+.modal-fmt{display:inline-block;font-size:11px;color:var(--text3);padding:3px 10px;border:1px solid var(--border2);border-radius:20px;margin-left:6px;margin-bottom:12px}
+.modal-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;letter-spacing:-.01em;color:var(--text);margin-bottom:10px;line-height:1.3}
+.modal-section-label{font-size:10px;font-weight:600;letter-spacing:.07em;color:var(--text3);margin-top:16px;margin-bottom:8px;text-transform:uppercase}
+.modal-steps-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.modal-step-item{display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--text2);line-height:1.55}
+.modal-step-num{width:20px;height:20px;border-radius:50%;background:var(--accent-bg);border:1px solid var(--accent-border);color:var(--accent);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;font-family:'Syne',sans-serif}
+.modal-action{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:11px;background:var(--accent-bg);border:1px solid var(--accent-border);color:var(--accent);border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;font-family:'Syne',sans-serif;transition:all .15s}
+.modal-action:hover{background:var(--accent);color:#06150e}
+
+.drag-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg4);border:1px solid var(--accent-border);color:var(--accent);font-size:12px;font-weight:600;padding:8px 18px;border-radius:20px;opacity:0;pointer-events:none;transition:all .25s;z-index:5000;white-space:nowrap}
+.drag-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="header">
+  <div class="logo">Content<span>OS</span></div>
+</div>
+
+<!-- ══ SETUP ══ -->
+<div id="setupView">
+
+  <div class="setup-card">
+    <div class="setup-title">Build your content calendar</div>
+    <div class="setup-sub">Configure when you work, then choose your niche & pillars. We'll generate your full calendar mapped to your schedule.</div>
+
+    <!-- STEP 1: HUSTLE HOURS (TIME FIRST) -->
+    <div class="setup-step">
+      <div class="setup-step-label" data-step="1">Your Work Schedule</div>
+      
+      <div style="margin-bottom:1.5rem">
+        <div class="chips-label">ACTIVE DAYS</div>
+        <div class="hustledays-chip-row" id="hustleDaysSetup" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.25rem"></div>
+      </div>
+
+      <div class="sel-row">
+        <div class="field">
+          <label>WORK STARTS</label>
+          <select id="hustleStartSetup">
+            <option value="0">12:00 AM</option>
+            <option value="1">1:00 AM</option>
+            <option value="2">2:00 AM</option>
+            <option value="3">3:00 AM</option>
+            <option value="4">4:00 AM</option>
+            <option value="5">5:00 AM</option>
+            <option value="6">6:00 AM</option>
+            <option value="7" selected>7:00 AM</option>
+            <option value="8">8:00 AM</option>
+            <option value="9">9:00 AM</option>
+            <option value="10">10:00 AM</option>
+            <option value="11">11:00 AM</option>
+            <option value="12">12:00 PM</option>
+            <option value="13">1:00 PM</option>
+            <option value="14">2:00 PM</option>
+            <option value="15">3:00 PM</option>
+            <option value="16">4:00 PM</option>
+            <option value="17">5:00 PM</option>
+            <option value="18">6:00 PM</option>
+            <option value="19">7:00 PM</option>
+            <option value="20">8:00 PM</option>
+            <option value="21">9:00 PM</option>
+            <option value="22">10:00 PM</option>
+            <option value="23">11:00 PM</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>WORK ENDS</label>
+          <select id="hustleEndSetup">
+            <option value="0">12:00 AM</option>
+            <option value="1">1:00 AM</option>
+            <option value="2">2:00 AM</option>
+            <option value="3">3:00 AM</option>
+            <option value="4">4:00 AM</option>
+            <option value="5">5:00 AM</option>
+            <option value="6">6:00 AM</option>
+            <option value="7">7:00 AM</option>
+            <option value="8">8:00 AM</option>
+            <option value="9">9:00 AM</option>
+            <option value="10">10:00 AM</option>
+            <option value="11">11:00 AM</option>
+            <option value="12">12:00 PM</option>
+            <option value="13">1:00 PM</option>
+            <option value="14">2:00 PM</option>
+            <option value="15">3:00 PM</option>
+            <option value="16">4:00 PM</option>
+            <option value="17">5:00 PM</option>
+            <option value="18" selected>6:00 PM</option>
+            <option value="19">7:00 PM</option>
+            <option value="20">8:00 PM</option>
+            <option value="21">9:00 PM</option>
+            <option value="22">10:00 PM</option>
+            <option value="23">11:00 PM</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="chips-label" style="margin-top:1rem">CONTENT HOURS PER DAY</div>
+      <div class="hustlehourstabs" id="hustleHoursSetup" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:0"></div>
+    </div>
+
+    <!-- STEP 2: NICHE & PLATFORM -->
+    <div class="setup-step">
+      <div class="setup-step-label" data-step="2">Your Niche & Platform</div>
+      
+      <div class="sel-row">
+        <div class="field">
+          <label>YOUR NICHE</label>
+          <select id="nicheSelect" onchange="onNicheChange()">
+            <option value="ai">AI & Tech</option>
+            <option value="finance">Personal Finance</option>
+            <option value="fitness">Fitness & Health</option>
+            <option value="selfdev">Self-Development</option>
+            <option value="business">Business & Entrepreneurship</option>
+            <option value="marketing">Marketing & Social Media</option>
+            <option value="fashion">Fashion & Beauty</option>
+            <option value="travel">Travel & Lifestyle</option>
+            <option value="food">Food & Recipes</option>
+            <option value="realestate">Real Estate</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>POSTING FREQUENCY</label>
+          <select id="freqSelect">
+            <option value="3">3× per week</option>
+            <option value="4">4× per week</option>
+            <option value="5">5× per week</option>
+            <option value="7">Daily (7×)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>PLATFORM</label>
+        <select id="platformSelect">
+          <option value="Instagram">Instagram</option>
+          <option value="TikTok">TikTok</option>
+          <option value="LinkedIn">LinkedIn</option>
+          <option value="YouTube">YouTube</option>
+          <option value="Twitter / X">Twitter / X</option>
+          <option value="Facebook">Facebook</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- STEP 3: FORMATS & PILLARS -->
+    <div class="setup-step">
+      <div class="setup-step-label" data-step="3">Content Formats & Pillars</div>
+      
+      <div class="chips-label">CONTENT FORMATS</div>
+      <div class="chips" id="fmtChips" style="margin-bottom:1.5rem"></div>
+
+      <div class="chips-label">CHOOSE YOUR CONTENT PILLARS <span style="color:var(--text3)">(pick 3–5)</span></div>
+      <div class="sel-info">Selected: <span id="selCount">0</span> pillars</div>
+      <div class="pillar-grid" id="pillarGrid" style="margin-bottom:1.5rem"></div>
+    </div>
+
+    <button class="build-btn" onclick="buildCalendar()">
+      <i class="ti ti-calendar-stats"></i> Generate my calendar
+    </button>
+  </div>
+</div>
+
+<!-- ══ RESULT ══ -->
+<div id="resultView" style="display:none">
+  <div class="result-meta" id="resultMeta"></div>
+  <div class="stats-row" id="statsRow"></div>
+
+  <div class="tabs">
+    <button class="tab on" onclick="switchTab('tCal',this)"><i class="ti ti-calendar"></i> Calendar</button>
+    <button class="tab" onclick="switchTab('tPrompts',this)"><i class="ti ti-copy"></i> AI Prompts</button>
+    <button class="tab" onclick="switchTab('tAction',this)"><i class="ti ti-list-check"></i> Action Plan</button>
+  </div>
+
+  <!-- TAB 1: TABLEAU MATRIX CALENDAR -->
+  <div class="tsec on" id="tCal">
+    <div class="tableau-header">
+      <div class="tableau-left">
+        <div class="tableau-title" id="calMonthLbl"></div>
+        <div class="legend" id="calLegend"></div>
+      </div>
+      <button class="save-btn" id="saveBtnCalendar" onclick="downloadWorkspace()" style="display:none"><i class="ti ti-download" style="font-size:13px"></i> Save Workspace</button>
+    </div>
+    <div class="tableau-wrapper" id="tableauContainer"></div>
+    <div id="dragToast" class="drag-toast"></div>
+  </div>
+
+  <!-- TAB 2: PROMPTS -->
+  <div class="tsec" id="tPrompts">
+    <div class="tip-box"><i class="ti ti-bulb"></i>Every prompt is matched to your niche and pillar. Paste into ChatGPT or Claude and get a full post in seconds.</div>
+    <div class="filter-row" id="promptFilter"></div>
+    <div id="promptStack"></div>
+  </div>
+
+  <!-- TAB 3: ACTION PLAN -->
+  <div class="tsec" id="tAction">
+    <div class="tip-box"><i class="ti ti-rocket"></i>Your personalised week-by-week plan. Each posting day has exact steps — from idea to publish.</div>
+    <div id="actionStack"></div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<!-- ── IDEA MODAL ── -->
+<div class="modal-overlay" id="ideaModal" onclick="closeModal(event)">
+  <div class="modal-box" id="ideaModalBox">
+    <button class="modal-close" onclick="closeModalDirect()"><i class="ti ti-x"></i></button>
+    <div class="modal-date" id="mDate"></div>
+    <div>
+      <span class="modal-pillar" id="mPillar"></span>
+      <span class="modal-fmt" id="mFmt"></span>
+    </div>
+    <div class="modal-title" id="mTitle"></div>
+    
+    <div class="modal-section-label">ACTION STEPS FOR THIS POST</div>
+    <div class="modal-steps-list" id="mSteps"></div>
+
+    <button class="modal-action" onclick="goToPrompts()"><i class="ti ti-copy"></i> View AI Prompts for this pillar</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════
+//  DATA & STATE
+// ══════════════════════════════
+const NICHES = {
+  ai:{label:"AI & Tech",pillars:[{i:"ti-robot",n:"AI Tool Reviews",s:"Demo & compare tools"},{i:"ti-sparkles",n:"AI Tips & Tricks",s:"Shortcuts & hacks"},{i:"ti-coin",n:"Make Money with AI",s:"Income ideas using AI"},{i:"ti-bolt",n:"Productivity Hacks",s:"Save hours every day"},{i:"ti-trending-up",n:"AI News & Trends",s:"What's hot in AI"},{i:"ti-users",n:"Community Q&A",s:"Answer follower Qs"},{i:"ti-code",n:"AI Tool Tutorials",s:"Step-by-step walkthroughs"},{i:"ti-flame",n:"Hot Takes",s:"Opinions on AI trends"}],prompts:{"AI Tool Reviews":[{fmt:"Carousel",title:"Tool Review Breakdown",p:"Write a 5-slide Instagram carousel reviewing [TOOL NAME] for [YOUR NICHE] creators. Slide 1: Hook ('I tested [TOOL] so you don't have to'). Slide 2: What it does in plain English. Slide 3: Best use case with a real example. Slide 4: Biggest limitation. Slide 5: Rating out of 10 + who it's for. Keep each slide to 1–2 punchy sentences."},{fmt:"Reel",title:"60-Second Tool Demo Script",p:"Write a 60-second TikTok/Reel script showing how to use [TOOL NAME] to [SPECIFIC TASK]. Format: Hook (0–3s), Problem setup (3–10s), Tool demo narration (10–45s), Result reveal (45–55s), CTA (55–60s). Use excited, casual language."}],"AI Tips & Tricks":[{fmt:"Carousel",title:"5 AI Prompts That Save Time",p:"Write a 6-slide carousel: '5 AI prompts that save me 3 hours a week.' Slide 1: Bold hook. Slides 2–6: One prompt per slide — name the task, show the exact prompt in quotes, explain the result in one line. End with 'Save this post.'"},{fmt:"Caption",title:"One AI Trick Caption",p:"Write an Instagram caption revealing one underrated AI trick that most people don't know. Start with 'Nobody talks about this…' or 'This AI trick changed how I work:'. Explain the trick clearly in 3–4 sentences. End with a question to drive comments."}]},steps:{"Carousel":["Pick your main point and write 1 sentence per slide","Design slides in Canva (use a saved template)","Add your hook as slide 1 — test 2 versions","Export and schedule or post with full caption"],"Reel":["Write your script and time it (under 60s)","Film in one take or screen record","Add captions using auto-caption tool","Add trending audio and post with keywords in caption"],"Caption":["Write 3 headline options, pick the strongest","Write the body (tip, story, or opinion)","Add your CTA question at the end","Copy into your platform and add hashtags"],"Stories":["Plan 3–5 story frames: hook → value → CTA","Use polls or question stickers on frame 3","Screenshot any replies and reshare as content","Add a swipe-up or link sticker"],"Long-form":["Outline: Hook → 3 points → conclusion","Write in your natural voice, read aloud to check","Add subheadings and bold key lines","Post in the morning for best reach"]}},
+  finance:{label:"Personal Finance",pillars:[{i:"ti-coin",n:"Side Hustle Ideas",s:"Extra income streams"},{i:"ti-chart-bar",n:"Budget Tips",s:"Save & manage money"},{i:"ti-trending-up",n:"Investing Basics",s:"Grow your wealth"},{i:"ti-briefcase",n:"Freelance Tips",s:"Land clients & earn"},{i:"ti-star",n:"Success Stories",s:"Real income wins"},{i:"ti-brain",n:"Money Mindset",s:"Think like the wealthy"},{i:"ti-receipt",n:"Saving Strategies",s:"Cut costs smartly"},{i:"ti-credit-card",n:"Debt Freedom",s:"Pay off & stay free"}],prompts:{},steps:{}},
+  fitness:{label:"Fitness & Health",pillars:[{i:"ti-barbell",n:"Workout Tutorials",s:"Exercise guides & demos"},{i:"ti-apple",n:"Nutrition Tips",s:"Eat for your goals"},{i:"ti-trophy",n:"Transformation Stories",s:"Real progress wins"},{i:"ti-moon",n:"Recovery & Sleep",s:"Rest smarter"},{i:"ti-flame",n:"Fat Loss Tips",s:"Science-backed cutting"},{i:"ti-brain",n:"Fitness Mindset",s:"Stay consistent"},{i:"ti-salad",n:"Meal Prep",s:"Prep once, eat well all week"},{i:"ti-x",n:"Fitness Myths",s:"Bust common mistakes"}],prompts:{},steps:{}},
+  selfdev:{label:"Self-Development",pillars:[{i:"ti-sun",n:"Morning Routines",s:"Start your day right"},{i:"ti-brain",n:"Mindset Tips",s:"Mental strength daily"},{i:"ti-target",n:"Goal Setting",s:"Achieve what you want"},{i:"ti-book",n:"Book Lessons",s:"Key insights distilled"},{i:"ti-heart",n:"Mental Health",s:"Take care of your mind"},{i:"ti-clock",n:"Time Management",s:"Do more in less time"},{i:"ti-repeat",n:"Habit Building",s:"Stack habits that stick"},{i:"ti-writing",n:"Journaling",s:"Reflect & grow"}],prompts:{},steps:{}},
+  business:{label:"Business & Entrepreneurship",pillars:[{i:"ti-building",n:"Business Strategy",s:"Build & scale smarter"},{i:"ti-speakerphone",n:"Marketing Tips",s:"Promote & sell better"},{i:"ti-rocket",n:"Launch Content",s:"Announce & sell products"},{i:"ti-users",n:"Client Stories",s:"Social proof & wins"},{i:"ti-mail",n:"Email Marketing",s:"Grow & monetise a list"},{i:"ti-chart-line",n:"Revenue Breakdown",s:"Show your numbers"},{i:"ti-edit",n:"Content Creation",s:"Build an audience"},{i:"ti-lightbulb",n:"Founder Lessons",s:"Real talk from the trenches"}],prompts:{},steps:{}},
+  marketing:{label:"Marketing & Social Media",pillars:[{i:"ti-chart-bar",n:"Growth Tips",s:"Grow your following fast"},{i:"ti-pencil",n:"Copywriting",s:"Words that sell"},{i:"ti-eye",n:"Viral Post Breakdowns",s:"Why posts blow up"},{i:"ti-brand-instagram",n:"Platform Strategies",s:"Instagram, TikTok, LinkedIn"},{i:"ti-package",n:"Brand Building",s:"Stand out in your niche"},{i:"ti-mail",n:"DM Scripts",s:"Convert followers to clients"},{i:"ti-layout",n:"Content Systems",s:"Create without burning out"},{i:"ti-trending-up",n:"Algorithm Updates",s:"Stay ahead of changes"}],prompts:{},steps:{}},
+  fashion:{label:"Fashion & Beauty",pillars:[{i:"ti-shirt",n:"Outfit Ideas",s:"Daily style inspiration"},{i:"ti-star",n:"Product Reviews",s:"Honest beauty & fashion reviews"},{i:"ti-heart",n:"Get Ready With Me",s:"Real-time styling content"},{i:"ti-palette",n:"Styling Tips",s:"How to wear & pair pieces"},{i:"ti-trending-up",n:"Trend Reports",s:"What's in & out"},{i:"ti-recycle",n:"Sustainable Fashion",s:"Shop & style responsibly"},{i:"ti-discount",n:"Budget Styling",s:"Look great for less"},{i:"ti-camera",n:"Behind the Look",s:"Your process & inspiration"}],prompts:{},steps:{}},
+  travel:{label:"Travel & Lifestyle",pillars:[{i:"ti-map",n:"Destination Guides",s:"Where to go & what to do"},{i:"ti-coin",n:"Budget Travel",s:"Explore for less"},{i:"ti-calendar",n:"Itineraries",s:"Day-by-day travel plans"},{i:"ti-fork-spoon",n:"Food Experiences",s:"Best eats around the world"},{i:"ti-compass",n:"Hidden Gems",s:"Off-the-beaten-path finds"},{i:"ti-backpack",n:"Packing Guides",s:"Pack smart, travel light"},{i:"ti-device-laptop",n:"Digital Nomad Life",s:"Work & travel freedom"},{i:"ti-camera",n:"Travel Photography",s:"Capture your journey"}],prompts:{},steps:{}},
+  food:{label:"Food & Recipes",pillars:[{i:"ti-chef-hat",n:"Recipe Tutorials",s:"Step-by-step cooking guides"},{i:"ti-apple",n:"Nutrition Info",s:"What's in your food"},{i:"ti-clock",n:"Quick & Easy Meals",s:"Ready in 30 minutes or less"},{i:"ti-leaf",n:"Healthy Swaps",s:"Eat better without trying"},{i:"ti-flame",n:"Cooking Techniques",s:"Level up your kitchen skills"},{i:"ti-star",n:"Restaurant Reviews",s:"Where to eat & what to order"},{i:"ti-calendar",n:"Meal Prep",s:"Plan & prep for the week"},{i:"ti-world",n:"Cuisine Spotlights",s:"Explore global food"}],prompts:{},steps:{}},
+  realestate:{label:"Real Estate",pillars:[{i:"ti-home",n:"Market Updates",s:"What's happening right now"},{i:"ti-key",n:"Buying Tips",s:"How to buy smart"},{i:"ti-coin",n:"Investment Properties",s:"Build wealth through property"},{i:"ti-building",n:"Home Tours",s:"Showcase properties"},{i:"ti-hammer",n:"Renovation Ideas",s:"Add value to your home"},{i:"ti-users",n:"Client Stories",s:"Real buyer/seller wins"},{i:"ti-receipt",n:"Mortgage Basics",s:"Finance explained simply"},{i:"ti-map",n:"Neighbourhood Guides",s:"Know the local market"}],prompts:{},steps:{}}
+};
+
+const FORMATS_ALL = ["Carousels","Reels / Videos","Captions","Stories","Long-form"];
+const FORMAT_SHORT = {"Carousels":"Carousel","Reels / Videos":"Reel","Captions":"Caption","Stories":"Stories","Long-form":"Long-form"};
+const PILLAR_COLORS = ["#6ee7b7","#a78bfa","#fbbf24","#60a5fa","#f472b6"];
+
+let selPillars=[], selFormats=["Carousels","Reels / Videos"], curNiche="ai";
+let builtCalendar=[], activeFilter="All";
+let builtMonthName="", builtYear=0;
+let currentModalPillar="";
+
+let hustleData = {
+  days: [1,2,3,4,5],
+  start: 7,
+  end: 18,
+  hours: 2
+};
+
+// ─── INIT ───
+function init(){
+  buildFmtChips();
+  onNicheChange();
+  initHustleSetup();
+}
+
+function initHustleSetup(){
+  const dayNames=[{s:'Mo',v:1},{s:'Tu',v:2},{s:'We',v:3},{s:'Th',v:4},{s:'Fr',v:5},{s:'Sa',v:6},{s:'Su',v:0}];
+  const dc=document.getElementById('hustleDaysSetup'); if(!dc)return; dc.innerHTML='';
+  dayNames.forEach(d=>{
+    const el=document.createElement('div');
+    el.textContent=d.s;
+    const isOn=hustleData.days.includes(d.v);
+    el.style.cssText=isOn?'padding:6px 12px;border-radius:20px;font-size:12px;border:1px solid var(--accent-border);background:var(--accent-bg);color:var(--accent);cursor:pointer;transition:all .15s;font-weight:500':'padding:6px 12px;border-radius:20px;font-size:12px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all .15s';
+    el.onclick=()=>{
+      const idx=hustleData.days.indexOf(d.v);
+      if(idx>=0){if(hustleData.days.length>1)hustleData.days.splice(idx,1);}
+      else hustleData.days.push(d.v);
+      hustleData.days.sort((a,b)=>a-b);
+      initHustleSetup();
+    };
+    dc.appendChild(el);
+  });
+
+  const hp=document.getElementById('hustleHoursSetup'); if(!hp)return; hp.innerHTML='';
+  [0.5,1,1.5,2,3,4,5,6].forEach(h=>{
+    const el=document.createElement('div');
+    el.textContent=h<1?'30m':(h===1?'1h':h+'h');
+    const isOn=h===hustleData.hours;
+    el.style.cssText=isOn?'padding:6px 12px;border-radius:20px;font-size:12px;border:1px solid var(--accent-border);background:var(--accent-bg);color:var(--accent);cursor:pointer;transition:all .15s;font-weight:600':'padding:6px 12px;border-radius:20px;font-size:12px;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;transition:all .15s';
+    el.onclick=()=>{hustleData.hours=h;hustleData.start=+document.getElementById('hustleStartSetup').value;hustleData.end=+document.getElementById('hustleEndSetup').value;initHustleSetup();};
+    hp.appendChild(el);
+  });
+
+  document.getElementById('hustleStartSetup').value=hustleData.start;
+  document.getElementById('hustleEndSetup').value=hustleData.end;
+  document.getElementById('hustleStartSetup').onchange=()=>{hustleData.start=+document.getElementById('hustleStartSetup').value;};
+  document.getElementById('hustleEndSetup').onchange=()=>{hustleData.end=+document.getElementById('hustleEndSetup').value;};
+}
+
+function buildFmtChips(){
+  const c=document.getElementById("fmtChips"); if(!c)return; c.innerHTML="";
+  FORMATS_ALL.forEach(f=>{
+    const el=document.createElement("div");
+    el.className="chip"+(selFormats.includes(f)?" on":"");
+    el.textContent=f;
+    el.onclick=()=>{
+      if(el.classList.contains("on")){
+        if(selFormats.length>1){el.classList.remove("on");selFormats=selFormats.filter(x=>x!==f);}
+      } else {el.classList.add("on");selFormats.push(f);}
+    };
+    c.appendChild(el);
+  });
+}
+
+function onNicheChange(){
+  curNiche=document.getElementById("nicheSelect").value;
+  selPillars=[];
+  const data=NICHES[curNiche];
+  const g=document.getElementById("pillarGrid"); if(!g)return; g.innerHTML="";
+  document.getElementById("selCount").textContent="0";
+  data.pillars.forEach((p,i)=>{
+    const el=document.createElement("div"); el.className="pcard";
+    el.innerHTML=`<i class="ti ${p.i} pc-icon"></i><div class="pc-name">${p.n}</div><div class="pc-sub">${p.s}</div>`;
+    el.onclick=()=>{
+      if(el.classList.contains("on")){
+        if(selPillars.length>1){el.classList.remove("on");selPillars=selPillars.filter(x=>x!==p.n);}
+      } else if(selPillars.length<5){el.classList.add("on");selPillars.push(p.n);}
+      document.getElementById("selCount").textContent=selPillars.length;
+    };
+    g.appendChild(el);
+  });
+}
+
+function buildCalendar(){
+  if(selPillars.length<3){alert("Please select at least 3 content pillars.");return;}
+
+  hustleData.start=+document.getElementById('hustleStartSetup').value;
+  hustleData.end=+document.getElementById('hustleEndSetup').value;
+
+  const freq=parseInt(document.getElementById("freqSelect").value);
+  const platform=document.getElementById("platformSelect").value;
+  const niche=NICHES[curNiche];
+  const now=new Date();
+  const monthName=now.toLocaleString("default",{month:"long"});
+  const year=now.getFullYear();
+  const totalDays=new Date(year,now.getMonth()+1,0).getDate();
+
+  const REST_PATTERNS={3:[2,4,6],4:[3,6],5:[6,7],7:[]};
+  const restDays=REST_PATTERNS[freq]||[3,6];
+
+  builtCalendar=[];
+  let pillarIdx=0, fmtIdx=0;
+  const fmtKeys=selFormats.map(f=>FORMAT_SHORT[f]).filter(Boolean);
+  const fmtList=fmtKeys.length?fmtKeys:["Carousel"];
+
+  for(let d=1;d<=totalDays;d++){
+    const dayOfWeek=new Date(year,now.getMonth(),d).getDay();
+    const isRestDay=restDays.includes(dayOfWeek===0?7:dayOfWeek);
+    if(isRestDay){
+      builtCalendar.push({day:d,rest:true});
+    } else {
+      const pillar=selPillars[pillarIdx%selPillars.length];
+      const fmt=fmtList[fmtIdx%fmtList.length];
+      const topic=`[Topic for ${pillar} - ${fmt}]`;
+      builtCalendar.push({day:d,rest:false,pillar,pillarIdx:pillarIdx%selPillars.length,fmt,topic});
+      pillarIdx++; fmtIdx++;
+    }
+  }
+
+  renderResult(monthName,year,totalDays,platform,freq);
+  builtMonthName = monthName;
+  builtYear = year;
+}
+
+function renderResult(monthName,year,totalDays,platform,freq){
+  const postDays=builtCalendar.filter(d=>!d.rest);
+  const niche=NICHES[curNiche];
+
+  const meta=document.getElementById("resultMeta");
+  meta.innerHTML=`
+    <div class="meta-tag hl">${niche.label}</div>
+    <div class="meta-tag">${platform}</div>
+    <div class="meta-tag">${freq}× per week</div>
+    <div style="margin-left:auto"><button class="back-btn" onclick="goBack()"><i class="ti ti-arrow-left" style="font-size:13px"></i> Start over</button></div>
+  `;
+
+  document.getElementById("statsRow").innerHTML=`
+    <div class="stat"><div class="stat-val">${totalDays}</div><div class="stat-lbl">DAYS</div></div>
+    <div class="stat"><div class="stat-val">${postDays.length}</div><div class="stat-lbl">POSTS</div></div>
+    <div class="stat"><div class="stat-val">${selPillars.length}</div><div class="stat-lbl">PILLARS</div></div>
+    <div class="stat"><div class="stat-val">${postDays.length*2}</div><div class="stat-lbl">PROMPTS</div></div>
+  `;
+
+  document.getElementById("calMonthLbl").textContent=`${monthName.toUpperCase()} ${year} — Tableau Matrix`;
+  const legend=document.getElementById("calLegend"); legend.innerHTML="";
+  selPillars.forEach((p,i)=>{
+    const d=document.createElement("div"); d.className="leg";
+    d.innerHTML=`<div class="leg-dot" style="background:${PILLAR_COLORS[i]}"></div>${p}`;
+    legend.appendChild(d);
+  });
+
+  renderTableauMatrix();
+
+  // ── TAB 2: PROMPTS ──
+  const filterRow=document.getElementById("promptFilter"); filterRow.innerHTML="";
+  const stack=document.getElementById("promptStack"); stack.innerHTML="";
+  activeFilter="All";
+
+  const allChip=document.createElement("div");
+  allChip.className="fchip on"; allChip.textContent="All";
+  allChip.onclick=()=>{
+    activeFilter="All";
+    document.querySelectorAll("#promptFilter .fchip").forEach(c=>c.classList.remove("on"));
+    allChip.classList.add("on");
+    filterPrompts();
+  };
+  filterRow.appendChild(allChip);
+
+  selPillars.forEach((p,pi)=>{
+    const fc=document.createElement("div"); fc.className="fchip"; fc.textContent=p;
+    fc.onclick=()=>{
+      activeFilter=p;
+      document.querySelectorAll("#promptFilter .fchip").forEach(c=>c.classList.remove("on"));
+      fc.classList.add("on");
+      filterPrompts();
+    };
+    filterRow.appendChild(fc);
+
+    const pillarPrompts=NICHES[curNiche].prompts[p]||[];
+    const selectedFmtShort=selFormats.map(f=>FORMAT_SHORT[f]).filter(Boolean);
+    const promptsToShow=pillarPrompts.filter(pr=>selectedFmtShort.includes(pr.fmt));
+    promptsToShow.forEach(pr=>{
+      const card=document.createElement("div"); card.className="prompt-card"; card.dataset.pillar=p;
+      const bg=PILLAR_COLORS[pi];
+      card.innerHTML=`
+        <div class="pc-head">
+          <span class="pc-badge" style="background:${bg}20;color:${bg}">${p}</span>
+          <span class="pc-fmt">${pr.fmt}</span>
+          <button class="copy-btn" onclick="doCopy(this,\`${escStr(pr.p)}\`)"><i class="ti ti-copy" style="font-size:11px"></i> Copy prompt</button>
+        </div>
+        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px">${pr.title}</div>
+        <div class="pc-text">${pr.p}</div>
+      `;
+      stack.appendChild(card);
+    });
+  });
+
+  function filterPrompts(){
+    document.querySelectorAll("#promptStack .prompt-card").forEach(c=>{
+      c.style.display=(activeFilter==="All"||c.dataset.pillar===activeFilter)?"block":"none";
+    });
+  }
+
+  // ── TAB 3: ACTION PLAN ──
+  buildActionPlan(monthName,year);
+
+  // Show result, hide setup
+  document.getElementById("setupView").style.display="none";
+  document.getElementById("resultView").style.display="block";
+  
+  // Show save button only on calendar tab
+  document.getElementById("saveBtnCalendar").style.display="flex";
+}
+
+function renderTableauMatrix(){
+  const container=document.getElementById("tableauContainer");
+  if(!container) return;
+  container.innerHTML="";
+
+  const hours=[];
+  for(let h=hustleData.start; h<hustleData.end; h++){
+    hours.push(h);
+  }
+
+  const dayNames=["Su","Mo","Tu","We","Th","Fr","Sa"];
+  const activeDays=hustleData.days.map(d=>d===0?7:d);
+
+  // Build grid
+  let gridTemplate=`70px repeat(${activeDays.length},1fr)`;
+  let gridHTML=`<div style="display:grid;grid-template-columns:${gridTemplate};gap:1px;background:var(--bg);padding:1px;min-width:100%">`;
+
+  // Corner
+  gridHTML+=`<div class="tableau-corner">Hours</div>`;
+
+  // Day headers
+  activeDays.forEach(dayIdx=>{
+    gridHTML+=`<div class="tableau-day-header">${dayNames[dayIdx===7?0:dayIdx]}</div>`;
+  });
+
+  // Hours and cells
+  hours.forEach(hour=>{
+    const ampm=hour<12?'AM':(hour===12?'PM':(hour-12)+'PM');
+    const hourLabel=(hour%12||12)+' '+ampm;
+    gridHTML+=`<div class="tableau-hour-label">${hourLabel}</div>`;
+
+    activeDays.forEach(dayIdx=>{
+      const cellContent=builtCalendar.find(e=>e.day%7===(dayIdx===7?0:dayIdx)&&!e.rest);
+      if(cellContent){
+        const bg=PILLAR_COLORS[cellContent.pillarIdx];
+        gridHTML+=`<div class="tableau-cell has-task" onclick="openIdeaModal({...${JSON.stringify(cellContent)},day:${cellContent.day}},\`${builtMonthName}\`,${builtYear})">
+          <div class="tableau-task p${cellContent.pillarIdx}">
+            <div class="tableau-task-pillar">${cellContent.pillar}</div>
+            <div class="tableau-task-fmt">${cellContent.fmt}</div>
+          </div>
+        </div>`;
+      } else {
+        gridHTML+=`<div class="tableau-cell"></div>`;
+      }
+    });
+  });
+
+  gridHTML+=`</div>`;
+  container.innerHTML=gridHTML;
+}
+
+function buildActionPlan(monthName, year){
+  const stack=document.getElementById("actionStack"); stack.innerHTML="";
+  const niche=NICHES[curNiche];
+  const now=new Date();
+  const daysInMonth=new Date(year,now.getMonth()+1,0).getDate();
+  const dayNames=["Su","Mo","Tu","We","Th","Fr","Sa"];
+  const dayFull=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+  let week=1, weekDays=[];
+  const flush=()=>{
+    if(!weekDays.length)return;
+    const wb=document.createElement("div"); wb.className="week-block";
+    const wh=document.createElement("div"); wh.className="week-header";
+    wh.innerHTML=`WEEK ${week}`;
+    wb.appendChild(wh);
+    weekDays.forEach(d=>{
+      const e=builtCalendar.find(x=>x.day===d);
+      if(!e)return;
+      const row=document.createElement("div");
+      const dow=new Date(year,now.getMonth(),d).getDay();
+      if(e.rest){
+        row.className="day-row";
+        row.innerHTML=`
+          <div class="dr-date"><div class="dr-day">${dayNames[dow]}</div><div class="dr-num">${d}</div></div>
+          <div class="dr-content"><div class="rest-label"><i class="ti ti-moon"></i> Rest day — no post required</div></div>
+        `;
+      } else {
+        row.className="day-row post-day";
+        const ci=e.pillarIdx; const color=PILLAR_COLORS[ci];
+        const baseSteps=niche.steps[e.fmt]||["Plan your content","Create your post","Review and edit","Publish at peak time"];
+        row.innerHTML=`
+          <div class="dr-date"><div class="dr-day">${dayNames[dow]}</div><div class="dr-num">${d}</div></div>
+          <div class="dr-content">
+            <span class="dr-pillar" style="background:${color}18;color:${color}">${e.pillar} · ${e.fmt}</span>
+            <div class="dr-topic">${e.topic}</div>
+            <ul class="dr-steps">${baseSteps.map((s,i)=>`<li><div class="step-num">${i+1}</div><span>${s}</span></li>`).join("")}</ul>
+          </div>
+        `;
+      }
+      wb.appendChild(row);
+    });
+    stack.appendChild(wb);
+    weekDays=[]; week++;
+  };
+
+  for(let d=1;d<=daysInMonth;d++){
+    weekDays.push(d);
+    const dow=new Date(year,now.getMonth(),d).getDay();
+    if(dow===0||d===daysInMonth) flush();
+  }
+}
+
+function openIdeaModal(entry, monthName, year){
+  const color = PILLAR_COLORS[entry.pillarIdx % PILLAR_COLORS.length];
+  const dow = new Date(year, new Date().getMonth(), entry.day).toLocaleString("default",{weekday:"long"});
+  const niche = NICHES[curNiche];
+  const baseSteps = niche.steps[entry.fmt] || ["Plan your content","Create your post","Review and edit","Publish at peak time"];
+
+  document.getElementById("mDate").textContent = `${dow.toUpperCase()}, ${monthName.toUpperCase()} ${entry.day}`;
+  const pillarEl = document.getElementById("mPillar");
+  pillarEl.textContent = entry.pillar;
+  pillarEl.style.background = color + "20";
+  pillarEl.style.color = color;
+  document.getElementById("mFmt").textContent = entry.fmt;
+  document.getElementById("mTitle").textContent = entry.topic;
+
+  const stepsEl = document.getElementById("mSteps");
+  stepsEl.innerHTML = baseSteps.map((s, i) => `
+    <div class="modal-step-item">
+      <div class="modal-step-num">${i+1}</div>
+      <span>${s}</span>
+    </div>
+  `).join("");
+
+  currentModalPillar = entry.pillar;
+  document.getElementById("ideaModal").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeModalDirect(){
+  document.getElementById("ideaModal").classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+function closeModal(e){
+  if(e.target === document.getElementById("ideaModal")) closeModalDirect();
+}
+
+function goToPrompts(){
+  closeModalDirect();
+  switchTab("tPrompts", document.querySelectorAll(".tab")[1]);
+  setTimeout(()=>{
+    const chips = document.querySelectorAll("#promptFilter .fchip");
+    chips.forEach(c => {
+      if(c.textContent === currentModalPillar){
+        c.click();
+      }
+    });
+  }, 100);
+}
+
+function switchTab(id,btn){
+  document.querySelectorAll(".tsec").forEach(s=>s.classList.remove("on"));
+  document.querySelectorAll(".tab").forEach(b=>b.classList.remove("on"));
+  document.getElementById(id).classList.add("on");
+  btn.classList.add("on");
+
+  // Hide/show save button based on tab
+  const saveBtn=document.getElementById("saveBtnCalendar");
+  if(id==="tCal"){
+    saveBtn.style.display="flex";
+  } else {
+    saveBtn.style.display="none";
+  }
+}
+
+function goBack(){
+  document.getElementById("resultView").style.display="none";
+  document.getElementById("setupView").style.display="block";
+}
+
+function doCopy(btn,text){
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.innerHTML='<i class="ti ti-check" style="font-size:11px"></i> Copied';
+    setTimeout(()=>{btn.innerHTML='<i class="ti ti-copy" style="font-size:11px"></i> Copy prompt';},1800);
+  });
+}
+
+function downloadWorkspace(){
+  const data={
+    niche:curNiche,
+    platform:document.getElementById('platformSelect').value,
+    freq:document.getElementById('freqSelect').value,
+    formats:selFormats,
+    pillars:selPillars,
+    calendar:builtCalendar,
+    monthName:builtMonthName,
+    year:builtYear,
+    hustleData:hustleData
+  };
+  const json=JSON.stringify(data,null,2);
+  const blob=new Blob([json],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`ContentOS-${builtMonthName}-${builtYear}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function escStr(s){
+  return (s||"").replace(/\\/g,"\\\\").replace(/`/g,"\\`").replace(/\$/g,"\\$");
+}
+
+init();
+</script>
+</body>
+</html>
